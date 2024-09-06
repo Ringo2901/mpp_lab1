@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .custom-file-label {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body class="container mt-5">
+<h1 class="text-center mb-4">Todo List</h1>
+
+<form action="/create" method="POST" enctype="multipart/form-data" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <input type="text" class="form-control" name="title" placeholder="Task title" required>
+    </div>
+    <div class="col-md-3">
+        <select name="status" class="form-select">
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <input type="date" class="form-control" name="dueDate">
+    </div>
+    <div class="col-md-2">
+        <input type="file" class="form-control" name="file">
+    </div>
+    <div class="col-md-12 text-center">
+        <button type="submit" class="btn btn-primary">Add Task</button>
+    </div>
+</form>
+
+<form action="/" method="GET" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <label for="sort" class="form-label">Sort by:</label>
+        <select name="sort" id="sort" class="form-select">
+            <option value="dateAsc" <%= sort === 'dateAsc' ? 'selected' : '' %>>Date (ascending)</option>
+            <option value="dateDesc" <%= sort === 'dateDesc' ? 'selected' : '' %>>Date (descending)</option>
+            <option value="statusAsc" <%= sort === 'statusAsc' ? 'selected' : '' %>>Status (ascending)</option>
+            <option value="statusDesc" <%= sort === 'statusDesc' ? 'selected' : '' %>>Status (descending)</option>
+        </select>
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+        <button type="submit" class="btn btn-secondary">Sort</button>
+    </div>
+</form>
+
+<h2 class="mb-4">Tasks</h2>
+<ul class="list-group">
+    <% tasks.forEach(task => { %>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong><%= task.title %></strong> - <%= task.status %>
+                (due: <%= task.dueDate || 'N/A' %>)
+                <% if (task.file) { %>
+                    <a href="/uploads/<%= task.file %>" class="btn btn-link">Download file</a>
+                <% } %>
+            </div>
+            <div class="btn-group">
+                <form action="/delete/<%= task.id %>" method="POST" class="d-inline">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+                <button class="btn btn-warning btn-sm" onclick="document.getElementById('editForm-<%= task.id %>').style.display = 'block'">Edit</button>
+            </div>
+        </li>
+        <form id="editForm-<%= task.id %>" action="/update/<%= task.id %>" method="POST" style="display:none;" class="mb-3">
+            <input type="hidden" name="_method" value="PUT">
+            <div class="input-group mb-2">
+                <input type="text" name="title" class="form-control" value="<%= task.title %>" required>
+                <select name="status" class="form-select">
+                    <option value="pending" <%= task.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="completed" <%= task.status === 'completed' ? 'selected' : '' %>>Completed</option>
+                </select>
+                <input type="date" name="dueDate" class="form-control" value="<%= task.dueDate %>">
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-success">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('editForm-<%= task.id %>').style.display = 'none'">Cancel</button>
+            </div>
+        </form>
+    <% }) %>
+</ul>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
